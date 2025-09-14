@@ -127,4 +127,4 @@ Grouping is by IP (`req.ip`) or you can define `key: (req) => 'user:'+id`.
 
 ## License
 
-MIT
+Proprietary
