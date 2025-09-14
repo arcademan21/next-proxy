@@ -3,7 +3,7 @@
  *
  * Security, CORS, centralization, logging, request/response transformation, and access control.
  *
- * @author ArcadeMan
+ * @author Haroldy Arturo Pérez Rodríguez
  * @license MIT
  * @version 1.0.0
  */
