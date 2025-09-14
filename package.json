@@ -1,7 +1,11 @@
 {
   "name": "next-proxy",
   "version": "1.0.0",
-  "description": "Proxy universal y seguro para Next.js. Centraliza, audita y controla todas las llamadas a APIs externas desde un solo punto, con soporte para logging, transformación de datos, control de acceso y más.",
+  "description": "Next Proxy is a universal, secure API proxy for Next.js projects. It centralizes, audits, and controls all external API calls from a single entry point, providing features like CORS, logging, request/response transformation, access control, and rate limiting—ideal for projects requiring governance and security over outbound traffic.",
+  "private": false,
+  "publishConfig": {
+    "access": "restricted"
+  },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
