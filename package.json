@@ -1,0 +1,46 @@
+{
+  "name": "next-proxy",
+  "version": "1.0.0",
+  "description": "Proxy universal y seguro para Next.js. Centraliza, audita y controla todas las llamadas a APIs externas desde un solo punto, con soporte para logging, transformación de datos, control de acceso y más.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --dts --format esm,cjs --out-dir dist --sourcemap",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm run clean && pnpm run build"
+  },
+  "keywords": [
+    "nextjs",
+    "proxy",
+    "api",
+    "cors",
+    "security",
+    "logging",
+    "rate-limit",
+    "transform",
+    "gateway"
+  ],
+  "author": "ArcadeMan",
+  "license": "MIT",
+  "peerDependencies": {
+    "next": ">=13.0.0"
+  },
+  "devDependencies": {
+    "@types/next": "^9.0.0",
+    "@types/node": "^20.19.14",
+    "tsup": "^8.5.0",
+    "typescript": "^5.5.0"
+  },
+  "sideEffects": false
+}
