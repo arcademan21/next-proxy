@@ -33,7 +33,7 @@
     "gateway"
   ],
   "author": "ArcadeMan",
-  "license": "MIT",
+  "license": "Proprietary",
   "peerDependencies": {
     "next": ">=13.0.0"
   },
