@@ -12,7 +12,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "lib": ["ES2022", "DOM"],
-    "types": ["node"],
+    "types": ["node", "jest"],
     "baseUrl": "."
   },
   "include": ["src/**/*"],
