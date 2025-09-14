@@ -4,7 +4,7 @@
  * Security, CORS, centralization, logging, request/response transformation, and access control.
  *
  * @author Haroldy Arturo Pérez Rodríguez - ArcadeMan <haroldyarturo@gmail.com>
- * @license MIT
+ * @license Proprietary
  * @version 1.0.0
  */
 import { NextRequest, NextResponse } from "next/server";
