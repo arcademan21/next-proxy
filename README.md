@@ -13,6 +13,23 @@ Universal, secure proxy for Next.js. Centralize, audit, and control all external
 
 Ideal for projects with multiple external integrations or governance requirements over outbound traffic.
 
+> ⚠️ **Notice: Turbopack Compatibility**
+
+Next Proxy is fully compatible with Next.js using Webpack. However, Turbopack (the new experimental bundler for Next.js) currently has limitations with local packages, workspaces, and some advanced module resolution patterns. If you experience issues using this package with Turbopack, consider the following options:
+
+- **Recommended:** Force the use of Webpack by adding to your `next.config.js`:
+  ```js
+  experimental: {
+    turbo: false;
+  }
+  ```
+- **If you want to use Turbopack:**
+  - Publish the package to npm (even as private) and install it from the registry, not as a local or symlinked package.
+  - Avoid cross-dependencies or indirect imports between workspaces.
+- **Alternative:** Bundle your module as a single JS file and consume it as a direct dependency.
+
+Turbopack is under active development and will improve over time. For the latest status, see [Vercel Turbopack GitHub](https://github.com/vercel/turbopack).
+
 ## Installation
 
 ```sh
