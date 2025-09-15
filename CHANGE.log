@@ -1,0 +1,9 @@
+
+# CHANGE.log
+
+## Cambios en los tests
+
+- Se movió la carpeta `test` a la raíz del paquete para facilitar la ejecución y mantenimiento de las pruebas.
+- Se corrigió el mock de `NextRequest` para que el header `origin` respete el valor pasado en cada test, permitiendo validar correctamente la lógica de CORS.
+- Se ajustó la configuración de Jest y TypeScript para incluir la carpeta `test` y asegurar la compatibilidad de tipos.
+- Se validó el correcto funcionamiento de los tests de CORS, rate limiting, transformación y validación de requests/responses.
