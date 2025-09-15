@@ -26,7 +26,10 @@
     "test": "jest"
   },
   "keywords": [
+    "next",
     "nextjs",
+    "nextjs middleware",
+    "next proxy",
     "proxy",
     "api",
     "cors",
@@ -36,8 +39,8 @@
     "transform",
     "gateway"
   ],
-  "author": "ArcadeMan",
-  "license": "Proprietary",
+  "author": "Haroldy Arturo Pérez Rodríguez <haroldyarturo@gmail.com>",
+  "license": "Public",
   "peerDependencies": {
     "next": ">=13.0.0"
   },
