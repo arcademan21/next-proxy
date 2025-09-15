@@ -185,23 +185,6 @@ export const POST = nextProxyHandler({
 });
 ```
 
-This pattern allows you to keep your API logic in the App Router (recommended for new Next.js projects) while using the classic Pages Router for your frontend. Both approaches work together seamlessly.
-
-## Full Options
-
-| Option              | Type                                | Description                                    |
-| ------------------- | ----------------------------------- | ---------------------------------------------- |
-| `log`               | `(info) => void`                    | Receives events: request, response, error.     |
-| `validate`          | `(req) => boolean \| Promise`       | Allows to block flow (auth, permissions).      |
-| `transformRequest`  | `({method,endpoint,data}) => {...}` | Modifies payload before fetch.                 |
-| `transformResponse` | `(res) => any`                      | Adjusts the response before sending to client. |
-| `rateLimit`         | `(req) => boolean \| Promise`       | Custom external rate limiting.                 |
-| `inMemoryRate`      | `{ windowMs, max, key? }`           | Simple in-memory rate limiting.                |
-| `allowOrigins`      | `string[]`                          | CORS whitelist.                                |
-| `onCorsDenied`      | `(origin) => any`                   | Custom response for denied CORS.               |
-| `maskSensitiveData` | `(data) => any`                     | Sanitizes data before sending.                 |
-| `baseUrl`           | `string`                            | Prefix for relative endpoints.                 |
-
 ## Advanced Example
 
 ```ts
@@ -226,6 +209,23 @@ export const POST = nextProxyHandler({
   },
 });
 ```
+
+This pattern allows you to keep your API logic in the App Router (recommended for new Next.js projects) while using the classic Pages Router for your frontend. Both approaches work together seamlessly.
+
+## Full Options
+
+| Option              | Type                                | Description                                    |
+| ------------------- | ----------------------------------- | ---------------------------------------------- |
+| `log`               | `(info) => void`                    | Receives events: request, response, error.     |
+| `validate`          | `(req) => boolean \| Promise`       | Allows to block flow (auth, permissions).      |
+| `transformRequest`  | `({method,endpoint,data}) => {...}` | Modifies payload before fetch.                 |
+| `transformResponse` | `(res) => any`                      | Adjusts the response before sending to client. |
+| `rateLimit`         | `(req) => boolean \| Promise`       | Custom external rate limiting.                 |
+| `inMemoryRate`      | `{ windowMs, max, key? }`           | Simple in-memory rate limiting.                |
+| `allowOrigins`      | `string[]`                          | CORS whitelist.                                |
+| `onCorsDenied`      | `(origin) => any`                   | Custom response for denied CORS.               |
+| `maskSensitiveData` | `(data) => any`                     | Sanitizes data before sending.                 |
+| `baseUrl`           | `string`                            | Prefix for relative endpoints.                 |
 
 ## CORS and Preflight
 
