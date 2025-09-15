@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export function middleware(request) {
+export function middleware(request: Request) {
   // Example: global authentication
   const token = request.headers.get("authorization");
   if (!token) {
