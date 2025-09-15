@@ -41,6 +41,11 @@
   ],
   "author": "Haroldy Arturo Pérez Rodríguez <haroldyarturo@gmail.com>",
   "license": "Public",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arcademan21/next-proxy"
+  },
+  "homepage": "https://github.com/arcademan21/next-proxy",
   "peerDependencies": {
     "next": ">=13.0.0"
   },

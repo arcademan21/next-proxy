@@ -118,37 +118,6 @@ export const POST = nextProxyHandler({
 
 ---
 
-**How to fetch from the frontend (Pages Router):**
-
-In a React component (e.g. `src/pages/index.tsx`), you should use a hook like `useEffect` to make the request after the component mounts:
-
-```tsx
-import { useEffect } from "react";
-
-export default function Home() {
-  useEffect(() => {
-    const fetchData = async () => {
-      const req = await fetch("/api/proxy", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          method: "GET",
-          endpoint: "/v1/health", // relative endpoint, will be resolved with baseUrl
-        }),
-      });
-      const res = await req.json();
-    };
-    fetchData();
-  }, []);
-
-  return (
-    <div>
-      <h1>Home page</h1>
-    </div>
-  );
-}
-```
-
 ## Usage with Pages Router
 
 ```ts
@@ -183,7 +152,7 @@ export const POST = nextProxyHandler({
 });
 ```
 
-## Advanced Example
+**Advanced Example**
 
 ```ts
 export const POST = nextProxyHandler({
@@ -206,6 +175,35 @@ export const POST = nextProxyHandler({
     return data;
   },
 });
+```
+
+In a React component (e.g. `src/pages/index.tsx`), you should use a hook like `useEffect` to make the request after the component mounts:
+
+```tsx
+import { useEffect } from "react";
+
+export default function Home() {
+  useEffect(() => {
+    const fetchData = async () => {
+      const req = await fetch("/api/proxy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          method: "GET",
+          endpoint: "/v1/health", // relative endpoint, will be resolved with baseUrl
+        }),
+      });
+      const res = await req.json();
+    };
+    fetchData();
+  }, []);
+
+  return (
+    <div>
+      <h1>Home page</h1>
+    </div>
+  );
+}
 ```
 
 This pattern allows you to keep your API logic in the App Router (recommended for new Next.js projects) while using the classic Pages Router for your frontend. Both approaches work together seamlessly.
