@@ -99,16 +99,16 @@ Turbopack is under active development and will improve over time. For the latest
 ## Installation
 
 ```sh
-pnpm add next-proxy
+pnpm add @arcademan/next-proxy
 # or
-npm install next-proxy
+npm install @arcademan/next-proxy
 ```
 
 ## Quick Usage (App Router)
 
 ```ts
 // app/api/proxy/route.ts
-import { nextProxyHandler } from "next-proxy";
+import { nextProxyHandler } from "@arcademan/next-proxy";
 
 export const POST = nextProxyHandler({
   baseUrl: process.env.EXTERNAL_API_BASE,
