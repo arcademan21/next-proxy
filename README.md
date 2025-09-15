@@ -1,4 +1,4 @@
-# Next Proxy
+# NextJs Proxy
 
 Universal, secure proxy for Next.js. Centralize, audit, and control all external API calls from a single entry point, with support for:
 
@@ -13,11 +13,11 @@ Universal, secure proxy for Next.js. Centralize, audit, and control all external
 
 Ideal for projects with multiple external integrations or governance requirements over outbound traffic.
 
-Next Proxy is designed to work seamlessly with the modern, native architecture of Next.js. For optimal performance, security, and maintainability, we recommend combining:
+NextJs Proxy is designed to work seamlessly with the modern, native architecture of Next.js. For optimal performance, security, and maintainability, we recommend combining:
 
 - **Rewrites** in `next.config.js` for declarative route mapping
 - **Middleware** for global, centralized logic (auth, rate limiting, logging)
-- **next-proxy handler** for advanced, per-endpoint proxy logic
+- **nextjs-proxy handler** for advanced, per-endpoint proxy logic
 
 ### 1. Route Rewrites (next.config.js)
 
@@ -61,7 +61,7 @@ export const config = {
 
 ```ts
 // app/api/proxy/route.ts
-import { nextProxyHandler } from "next-proxy";
+import { nextProxyHandler } from "nextjs-proxy";
 
 export const POST = nextProxyHandler({
   // ...all your advanced options (logging, transform, masking, etc.)
@@ -81,7 +81,7 @@ This pattern is fully aligned with the best practices recommended by the Next.js
 
 > ⚠️ **Warning: No Turbopack Compatibility**
 
-Next Proxy is fully compatible with Next.js using Webpack. However, Turbopack (the new experimental bundler for Next.js) currently has limitations with local packages, workspaces, and some advanced module resolution patterns. If you experience issues using this package with Turbopack, consider the following options:
+NextJs Proxy is fully compatible with Next.js using Webpack. However, Turbopack (the new experimental bundler for Next.js) currently has limitations with local packages, workspaces, and some advanced module resolution patterns. If you experience issues using this package with Turbopack, consider the following options:
 
 - **Recommended:** Force the use of Webpack by adding to your `next.config.js`:
   ```js
@@ -99,16 +99,16 @@ Turbopack is under active development and will improve over time. For the latest
 ## Installation
 
 ```sh
-pnpm add next-proxy
+pnpm add nextjs-proxy
 # or
-npm install next-proxy
+npm install nextjs-proxy
 ```
 
 ## Quick Usage (App Router)
 
 ```ts
 // app/api/proxy/route.ts
-import { nextProxyHandler } from "next-proxy";
+import { nextProxyHandler } from "nextjs-proxy";
 
 export const POST = nextProxyHandler({
   baseUrl: process.env.EXTERNAL_API_BASE,
@@ -123,7 +123,7 @@ export const POST = nextProxyHandler({
 ```ts
 // pages/api/proxy.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { nextProxyHandler } from "next-proxy";
+import { nextProxyHandler } from "nextjs-proxy";
 
 const handler = nextProxyHandler({ baseUrl: process.env.EXTERNAL_API_BASE });
 
@@ -137,13 +137,13 @@ export default async function proxy(req: NextApiRequest, res: NextApiResponse) {
 
 ## Combined usage: App Router API + Pages Router frontend
 
-You can use `next-proxy` in an App Router API route and call it from a Pages Router frontend. This is a common and fully supported scenario in Next.js projects.
+You can use `nextjs-proxy` in an App Router API route and call it from a Pages Router frontend. This is a common and fully supported scenario in Next.js projects.
 
 **API route (App Router):**
 
 ```ts
 // src/app/api/proxy/route.ts
-import { nextProxyHandler } from "next-proxy";
+import { nextProxyHandler } from "nextjs-proxy";
 
 export const POST = nextProxyHandler({
   baseUrl: "https://your-external-backend.com", // your external backend base URL
@@ -245,27 +245,27 @@ Grouping is by IP (`req.ip`) or you can define `key: (req) => 'user:'+id`.
 | `Origin not allowed`                | CORS blocked                             | Add origin to `allowOrigins` |
 | `Rate limit exceeded`               | Limit reached                            | Increase `max` or window     |
 
-# Comparison: next-proxy vs other Next.js proxy solutions
+# Comparison: nextjs-proxy vs other Next.js proxy solutions
 
 Next.js offers several ways to proxy API requests. Here’s when to use each approach:
 
-| Solution                       | Use Case                                                  | Limitations                                |
-| ------------------------------ | --------------------------------------------------------- | ------------------------------------------ |
-| **Rewrites (next.config.js)**  | Simple path forwarding, development, no logic needed      | Cannot modify headers, no auth, no logging |
-| **http-proxy / middleware**    | Custom API routes, can modify requests, more control      | More boilerplate, not native to App Router |
-| **next-http-proxy-middleware** | Simplifies http-proxy usage in API routes                 | Still requires custom route, less flexible |
-| **@navikt/next-api-proxy**     | Advanced token exchange, enterprise security              | Complex setup, focused on auth scenarios   |
-| **next-proxy (this package)**  | Centralized, configurable, minimal, works with App Router | Not for legacy custom servers              |
+| Solution                        | Use Case                                                  | Limitations                                |
+| ------------------------------- | --------------------------------------------------------- | ------------------------------------------ |
+| **Rewrites (next.config.js)**   | Simple path forwarding, development, no logic needed      | Cannot modify headers, no auth, no logging |
+| **http-proxy / middleware**     | Custom API routes, can modify requests, more control      | More boilerplate, not native to App Router |
+| **next-http-proxy-middleware**  | Simplifies http-proxy usage in API routes                 | Still requires custom route, less flexible |
+| **@navikt/next-api-proxy**      | Advanced token exchange, enterprise security              | Complex setup, focused on auth scenarios   |
+| **nextjs-proxy (this package)** | Centralized, configurable, minimal, works with App Router | Not for legacy custom servers              |
 
-## Why use next-proxy?
+## Why use nextjs-proxy?
 
 - Native integration with App Router and Pages Router
 - Centralized logic: CORS, logging, rate limiting, request/response transformation, access control
 - Minimal dependencies, clean API, easy to maintain
 - Ideal for projects needing governance, security, and audit over outbound traffic
 
-If you only need simple path forwarding for development, rewrites are enough. For production, security, and advanced logic, use next-proxy.
+If you only need simple path forwarding for development, rewrites are enough. For production, security, and advanced logic, use nextjs-proxy.
 
 ## License
 
-<a href="https://github.com/arcademan21/next-proxy/blob/main/LICENSE">MIT</a>
+<a href="https://github.com/arcademan21/nextjs-proxy/blob/main/LICENSE">MIT</a>
