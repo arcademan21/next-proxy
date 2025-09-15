@@ -249,6 +249,27 @@ Grouping is by IP (`req.ip`) or you can define `key: (req) => 'user:'+id`.
 | `Origin not allowed`                | CORS blocked                             | Add origin to `allowOrigins` |
 | `Rate limit exceeded`               | Limit reached                            | Increase `max` or window     |
 
+# Comparison: next-proxy vs other Next.js proxy solutions
+
+Next.js offers several ways to proxy API requests. Here’s when to use each approach:
+
+| Solution                       | Use Case                                                  | Limitations                                |
+| ------------------------------ | --------------------------------------------------------- | ------------------------------------------ |
+| **Rewrites (next.config.js)**  | Simple path forwarding, development, no logic needed      | Cannot modify headers, no auth, no logging |
+| **http-proxy / middleware**    | Custom API routes, can modify requests, more control      | More boilerplate, not native to App Router |
+| **next-http-proxy-middleware** | Simplifies http-proxy usage in API routes                 | Still requires custom route, less flexible |
+| **@navikt/next-api-proxy**     | Advanced token exchange, enterprise security              | Complex setup, focused on auth scenarios   |
+| **next-proxy (this package)**  | Centralized, configurable, minimal, works with App Router | Not for legacy custom servers              |
+
+**Why use next-proxy?**
+
+- Native integration with App Router and Pages Router
+- Centralized logic: CORS, logging, rate limiting, request/response transformation, access control
+- Minimal dependencies, clean API, easy to maintain
+- Ideal for projects needing governance, security, and audit over outbound traffic
+
+If you only need simple path forwarding for development, rewrites are enough. For production, security, and advanced logic, use next-proxy.
+
 ## License
 
 <a href="https://github.com/arcademan21/next-proxy/blob/main/LICENSE">MIT</a>
