@@ -1,4 +1,4 @@
-# Recommended Architecture: Rewrites + Middleware + next-proxy
+# Next Proxy
 
 Next Proxy is designed to work seamlessly with the modern, native architecture of Next.js. For optimal performance, security, and maintainability, we recommend combining:
 
@@ -48,7 +48,7 @@ export const config = {
 
 ```ts
 // app/api/proxy/route.ts
-import { nextProxyHandler } from "next-proxy";
+import { nextProxyHandler } from "@arcademan/next-proxy";
 
 export const POST = nextProxyHandler({
   // ...all your advanced options (logging, transform, masking, etc.)
