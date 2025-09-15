@@ -257,7 +257,7 @@ Next.js offers several ways to proxy API requests. Here’s when to use each app
 | **@navikt/next-api-proxy**     | Advanced token exchange, enterprise security              | Complex setup, focused on auth scenarios   |
 | **next-proxy (this package)**  | Centralized, configurable, minimal, works with App Router | Not for legacy custom servers              |
 
-**Why use next-proxy?**
+## Why use next-proxy?
 
 - Native integration with App Router and Pages Router
 - Centralized logic: CORS, logging, rate limiting, request/response transformation, access control
