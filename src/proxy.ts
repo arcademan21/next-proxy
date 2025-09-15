@@ -5,10 +5,16 @@
  *
  * @author Haroldy Arturo Pérez Rodríguez - ArcadeMan <haroldyarturo@gmail.com>
  * @license MIT
- * @version 1.0.0
+ * @version 1.0.15
  */
+
+// Next.js types
 import { NextRequest, NextResponse } from "next/server";
 
+// HTTP methods that do not have a body
+const WITHOUT_BODY = ["GET", "HEAD"];
+
+// Options for the proxy handler
 export interface NextProxyOptions {
   /** Logging callback for request/response/error events */
   log?: (info: Record<string, any>) => void;
@@ -40,15 +46,21 @@ export interface NextProxyOptions {
   };
 }
 
-const WITHOUT_BODY = ["GET", "HEAD"];
-
+// Internal state for in-memory rate limiting
 interface InternalRateState {
   count: number;
   expires: number;
 }
 
+// Simple in-memory store for rate limiting
 const rateStore: Map<string, InternalRateState> = new Map();
 
+/**
+ * Apply in-memory rate limiting
+ * @param req The NextRequest object
+ * @param cfg The rate limiting configuration
+ * @returns True if the request is allowed, false if rate limited
+ */
 function applyInMemoryRate(
   req: NextRequest,
   cfg: NonNullable<NextProxyOptions["inMemoryRate"]>
@@ -65,6 +77,10 @@ function applyInMemoryRate(
   return true;
 }
 
+/** Get client IP from request headers or connection info
+ * @param req The NextRequest object
+ * @returns The client IP as a string
+ */
 function getClientIp(req: NextRequest): string {
   const xf = req.headers.get("x-forwarded-for");
   if (xf) return xf.split(",")[0].trim();
@@ -72,6 +88,7 @@ function getClientIp(req: NextRequest): string {
   const nodeReq = (req as any)?._req; // best effort
   return nodeReq?.socket?.remoteAddress || "anon";
 }
+
 /**
  * Universal handler for proxying API requests in Next.js
  * @param options Advanced options for logging, validation, transformation, etc.
@@ -247,3 +264,12 @@ export function nextProxyHandler(options: NextProxyOptions = {}) {
     }
   };
 }
+
+// Default export for convenience
+export default nextProxyHandler;
+
+// --- DEV NOTES ---
+// 1. Ensure all request and response transformations are properly typed.
+// 2. Consider adding more detailed logging for debugging purposes.
+// 3. Review CORS handling to support more complex scenarios.
+// 4. Implement additional security measures as needed.

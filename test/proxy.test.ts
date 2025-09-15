@@ -30,8 +30,14 @@ async function getBody(res: any): Promise<any> {
   if (res._getData) return res._getData();
   return undefined;
 }
-import { nextProxyHandler, NextProxyOptions } from "../proxy";
-import { NextRequest } from "next/server";
+import { nextProxyHandler, NextProxyOptions } from "../src/proxy";
+// Definición local mínima de NextRequest para pruebas, igual que en proxy.ts
+type NextRequest = {
+  method: string;
+  headers: Headers;
+  json(): Promise<any>;
+  url: string;
+};
 
 // Mock NextRequest for testing
 function createMockRequest({
@@ -45,15 +51,12 @@ function createMockRequest({
   body?: any;
   origin?: string;
 } = {}): NextRequest {
-  const lowerHeaders: Record<string, string> = {};
-  for (const k in headers) {
-    lowerHeaders[k.toLowerCase()] = headers[k];
-  }
+  const realHeaders = new Headers(headers);
+  // Only set origin if not already present
+  if (origin && !realHeaders.has("origin")) realHeaders.set("origin", origin);
   return {
     method,
-    headers: {
-      get: (key: string) => lowerHeaders[key.toLowerCase()] || null,
-    },
+    headers: realHeaders,
     json: async () => body,
     url: "https://localhost/api/proxy",
   } as unknown as NextRequest;
