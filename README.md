@@ -209,4 +209,4 @@ Grouping is by IP (`req.ip`) or you can define `key: (req) => 'user:'+id`.
 
 ## License
 
-<a href="./LICENSE">MIT</a>
+<a href="./next-proxy/LICENSE">MIT</a>
