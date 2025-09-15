@@ -14,6 +14,7 @@ Universal, secure proxy for Next.js. Centralize, audit, and control all external
 - Support for relative endpoints via `baseUrl`
 
 Ideal for projects with multiple external integrations or governance requirements over outbound traffic.
+
 Next Proxy is designed to work seamlessly with the modern, native architecture of Next.js. For optimal performance, security, and maintainability, we recommend combining:
 
 - **Rewrites** in `next.config.js` for declarative route mapping
