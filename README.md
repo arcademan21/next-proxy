@@ -61,7 +61,7 @@ export const config = {
 
 ```ts
 // app/api/proxy/route.ts
-import { nextProxyHandler } from "@arcademan/next-proxy";
+import { nextProxyHandler } from "next-proxy";
 
 export const POST = nextProxyHandler({
   // ...all your advanced options (logging, transform, masking, etc.)
@@ -99,16 +99,16 @@ Turbopack is under active development and will improve over time. For the latest
 ## Installation
 
 ```sh
-pnpm add @arcademan/next-proxy
+pnpm add next-proxy
 # or
-npm install @arcademan/next-proxy
+npm install next-proxy
 ```
 
 ## Quick Usage (App Router)
 
 ```ts
 // app/api/proxy/route.ts
-import { nextProxyHandler } from "@arcademan/next-proxy";
+import { nextProxyHandler } from "next-proxy";
 
 export const POST = nextProxyHandler({
   baseUrl: process.env.EXTERNAL_API_BASE,
@@ -123,7 +123,7 @@ export const POST = nextProxyHandler({
 ```ts
 // pages/api/proxy.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { nextProxyHandler } from "@arcademan/next-proxy";
+import { nextProxyHandler } from "next-proxy";
 
 const handler = nextProxyHandler({ baseUrl: process.env.EXTERNAL_API_BASE });
 
@@ -143,7 +143,7 @@ You can use `next-proxy` in an App Router API route and call it from a Pages Rou
 
 ```ts
 // src/app/api/proxy/route.ts
-import { nextProxyHandler } from "@arcademan/next-proxy";
+import { nextProxyHandler } from "next-proxy";
 
 export const POST = nextProxyHandler({
   baseUrl: "https://your-external-backend.com", // your external backend base URL
