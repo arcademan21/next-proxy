@@ -79,7 +79,7 @@ export const POST = nextProxyHandler({
 
 This pattern is fully aligned with the best practices recommended by the Next.js team and the evolution of the framework.
 
-> ⚠️ **Notice: Turbopack Compatibility**
+> ⚠️ **Warning: No Turbopack Compatibility**
 
 Next Proxy is fully compatible with Next.js using Webpack. However, Turbopack (the new experimental bundler for Next.js) currently has limitations with local packages, workspaces, and some advanced module resolution patterns. If you experience issues using this package with Turbopack, consider the following options:
 
@@ -116,17 +116,37 @@ export const POST = nextProxyHandler({
 });
 ```
 
-Frontend example:
+---
 
-```ts
-await fetch("/api/proxy", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    method: "GET",
-    endpoint: "/v1/health", // relative -> will be resolved with baseUrl
-  }),
-});
+**How to fetch from the frontend (Pages Router):**
+
+In a React component (e.g. `src/pages/index.tsx`), you should use a hook like `useEffect` to make the request after the component mounts:
+
+```tsx
+import { useEffect } from "react";
+
+export default function Home() {
+  useEffect(() => {
+    const fetchData = async () => {
+      const req = await fetch("/api/proxy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          method: "GET",
+          endpoint: "/v1/health", // relative endpoint, will be resolved with baseUrl
+        }),
+      });
+      const res = await req.json();
+    };
+    fetchData();
+  }, []);
+
+  return (
+    <div>
+      <h1>Home page</h1>
+    </div>
+  );
+}
 ```
 
 ## Usage with Pages Router
@@ -134,7 +154,7 @@ await fetch("/api/proxy", {
 ```ts
 // pages/api/proxy.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { nextProxyHandler } from "next-proxy";
+import { nextProxyHandler } from "@arcademan/next-proxy";
 
 const handler = nextProxyHandler({ baseUrl: process.env.EXTERNAL_API_BASE });
 
@@ -145,6 +165,27 @@ export default async function proxy(req: NextApiRequest, res: NextApiResponse) {
   res.status(405).json({ error: "Use App Router for this package" });
 }
 ```
+
+## Combined usage: App Router API + Pages Router frontend
+
+You can use `next-proxy` in an App Router API route and call it from a Pages Router frontend. This is a common and fully supported scenario in Next.js projects.
+
+**Example:**
+
+**API route (App Router):**
+
+```ts
+// src/app/api/proxy/route.ts
+import { nextProxyHandler } from "@arcademan/next-proxy";
+
+export const POST = nextProxyHandler({
+  baseUrl: "https://your-external-backend.com", // your external backend base URL
+  allowOrigins: ["http://localhost:3000"], // adjust as needed
+  // You can add more options: log, validate, rateLimit, etc.
+});
+```
+
+This pattern allows you to keep your API logic in the App Router (recommended for new Next.js projects) while using the classic Pages Router for your frontend. Both approaches work together seamlessly.
 
 ## Full Options
 
