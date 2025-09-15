@@ -1,6 +1,6 @@
 {
   "name": "@arcademan/next-proxy",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Next Proxy is a universal, secure API proxy for Next.js projects. It centralizes, audits, and controls all external API calls from a single entry point, providing features like CORS, logging, request/response transformation, access control, and rate limiting—ideal for projects requiring governance and security over outbound traffic.",
   "private": false,
   "publishConfig": {
