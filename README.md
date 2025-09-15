@@ -170,8 +170,6 @@ export default async function proxy(req: NextApiRequest, res: NextApiResponse) {
 
 You can use `next-proxy` in an App Router API route and call it from a Pages Router frontend. This is a common and fully supported scenario in Next.js projects.
 
-**Example:**
-
 **API route (App Router):**
 
 ```ts
