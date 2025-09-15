@@ -1,7 +1,13 @@
 {
   "name": "nextjs-proxy",
   "version": "1.0.2",
-  "description": "Next Proxy is a universal, secure API proxy for Next.js projects. It centralizes, audits, and controls all external API calls from a single entry point, providing features like CORS, logging, request/response transformation, access control, and rate limiting—ideal for projects requiring governance and security over outbound traffic.",
+  "description": "Universal, secure proxy for Next.js. Centralize, audit, and control all external API calls from a single entry point.",
+  "author": "Haroldy Arturo Pérez Rodríguez <haroldyarturo@gmail.com>",
+  "license": "Public",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arcademan21/nextjs-proxy"
+  },
   "private": false,
   "publishConfig": {
     "access": "public"
@@ -39,12 +45,6 @@
     "transform",
     "gateway"
   ],
-  "author": "Haroldy Arturo Pérez Rodríguez <haroldyarturo@gmail.com>",
-  "license": "Public",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/arcademan21/nextjs-proxy"
-  },
   "peerDependencies": {
     "next": ">=13.0.0"
   },
