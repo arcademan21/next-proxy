@@ -1,5 +1,17 @@
 # Next Proxy
 
+Universal, secure proxy for Next.js. Centralize, audit, and control all external API calls from a single entry point, with support for:
+
+- Security (hides credentials and backend logic)
+- Configurable CORS
+- Centralized outbound traffic
+- Structured auditing and logging
+- Request/response transformation
+- Access control and validation
+- Rate limiting (custom and in-memory included)
+- Support for relative endpoints via `baseUrl`
+
+Ideal for projects with multiple external integrations or governance requirements over outbound traffic.
 Next Proxy is designed to work seamlessly with the modern, native architecture of Next.js. For optimal performance, security, and maintainability, we recommend combining:
 
 - **Rewrites** in `next.config.js` for declarative route mapping
@@ -65,21 +77,6 @@ export const POST = nextProxyHandler({
 - Easy maintenance and extensibility
 
 This pattern is fully aligned with the best practices recommended by the Next.js team and the evolution of the framework.
-
-# Next Proxy
-
-Universal, secure proxy for Next.js. Centralize, audit, and control all external API calls from a single entry point, with support for:
-
-- Security (hides credentials and backend logic)
-- Configurable CORS
-- Centralized outbound traffic
-- Structured auditing and logging
-- Request/response transformation
-- Access control and validation
-- Rate limiting (custom and in-memory included)
-- Support for relative endpoints via `baseUrl`
-
-Ideal for projects with multiple external integrations or governance requirements over outbound traffic.
 
 > ⚠️ **Notice: Turbopack Compatibility**
 
