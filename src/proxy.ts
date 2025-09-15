@@ -1,11 +1,8 @@
 /**
  * Next Proxy - Universal API Proxy for Next.js
- *
  * Security, CORS, centralization, logging, request/response transformation, and access control.
- *
  * @author Haroldy Arturo Pérez Rodríguez - ArcadeMan <haroldyarturo@gmail.com>
  * @license MIT
- * @version 1.0.15
  */
 
 // Next.js types
