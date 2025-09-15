@@ -15,6 +15,6 @@
     "types": ["node", "jest"],
     "baseUrl": "."
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "middleware.ts", "app/**/*"],
   "exclude": ["dist", "node_modules"]
 }

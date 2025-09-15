@@ -1,3 +1,71 @@
+# Recommended Architecture: Rewrites + Middleware + next-proxy
+
+Next Proxy is designed to work seamlessly with the modern, native architecture of Next.js. For optimal performance, security, and maintainability, we recommend combining:
+
+- **Rewrites** in `next.config.js` for declarative route mapping
+- **Middleware** for global, centralized logic (auth, rate limiting, logging)
+- **next-proxy handler** for advanced, per-endpoint proxy logic
+
+### 1. Route Rewrites (next.config.js)
+
+```js
+// next.config.js
+module.exports = {
+  async rewrites() {
+    return [
+      {
+        source: "/api/proxy/:path*",
+        destination: "/api/proxy", // All requests go to your handler
+      },
+    ];
+  },
+};
+```
+
+### 2. Global Middleware (middleware.ts)
+
+```js
+// middleware.ts
+import { NextResponse } from "next/server";
+
+export function middleware(request) {
+  // Example: global authentication
+  const token = request.headers.get("authorization");
+  if (!token) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  // Add logging, rate limiting, etc. here
+  return NextResponse.next();
+}
+
+// Apply only to proxy routes
+export const config = {
+  matcher: ["/api/proxy/:path*"],
+};
+```
+
+### 3. Centralized Advanced Logic (Handler)
+
+```ts
+// app/api/proxy/route.ts
+import { nextProxyHandler } from "next-proxy";
+
+export const POST = nextProxyHandler({
+  // ...all your advanced options (logging, transform, masking, etc.)
+});
+```
+
+---
+
+**With this approach you get:**
+
+- Native performance and compatibility (serverless/edge)
+- Centralized governance and security
+- Advanced proxy logic with minimal code duplication
+- Easy maintenance and extensibility
+
+This pattern is fully aligned with the best practices recommended by the Next.js team and the evolution of the framework.
+
 # Next Proxy
 
 Universal, secure proxy for Next.js. Centralize, audit, and control all external API calls from a single entry point, with support for:
@@ -144,4 +212,4 @@ Grouping is by IP (`req.ip`) or you can define `key: (req) => 'user:'+id`.
 
 ## License
 
-MIT
+<a href="./LICENSE">MIT</a>
