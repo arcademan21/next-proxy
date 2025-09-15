@@ -1,6 +1,6 @@
 # Next Proxy
 
-<img src="./nex-proxy/logo.svg" alt="Next Proxy Logo" width="200" height="auto" style="display: block; margin: 0;"/>
+<img src="next-proxy/logo.svg" alt="Next Proxy Logo" width="200" height="auto" style="display: block; margin: 0;"/>
 
 Universal, secure proxy for Next.js. Centralize, audit, and control all external API calls from a single entry point, with support for:
 
