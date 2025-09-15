@@ -7,3 +7,9 @@
 - Fixed the `NextRequest` mock so the `origin` header respects the value passed in each test, allowing correct validation of CORS logic.
 - Adjusted Jest and TypeScript configuration to include the `test` folder and ensure type compatibility.
 - Validated correct operation of tests for CORS, rate limiting, request/response transformation, and validation.
+
+--- DEV NOTES ---
+1. Ensure all request and response transformations are properly typed.
+2. Consider adding more detailed logging for debugging purposes.
+3. Review CORS handling to support more complex scenarios.
+4. Implement additional security measures as needed.

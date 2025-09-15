@@ -264,9 +264,3 @@ export function nextProxyHandler(options: NextProxyOptions = {}) {
 
 // Default export for convenience
 export default nextProxyHandler;
-
-// --- DEV NOTES ---
-// 1. Ensure all request and response transformations are properly typed.
-// 2. Consider adding more detailed logging for debugging purposes.
-// 3. Review CORS handling to support more complex scenarios.
-// 4. Implement additional security measures as needed.
