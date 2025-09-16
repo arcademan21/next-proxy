@@ -1,21 +1,6 @@
-## 2025-09-16
+# CHANGE.log 2025-09-16
 
 - Se agregan dos versiones de `nextProxyHandler`:
 	- Síncrona: integración directa y simple (`export const POST = nextProxyHandler(...)`).
 	- Asíncrona: para inicialización avanzada (`nextProxyHandlerAsync`).
 - Se actualiza la documentación para reflejar ambas opciones.
-
-# CHANGE.log
-
-## Test changes
-
-- Moved the `test` folder to the package root to facilitate test execution and maintenance.
-- Fixed the `NextRequest` mock so the `origin` header respects the value passed in each test, allowing correct validation of CORS logic.
-- Adjusted Jest and TypeScript configuration to include the `test` folder and ensure type compatibility.
-- Validated correct operation of tests for CORS, rate limiting, request/response transformation, and validation.
-
---- DEV NOTES ---
-1. [COMPLETADO] Todas las transformaciones de request y response están correctamente tipadas y validadas por tests.
-2. [COMPLETADO] Logging detallado implementado: incluye tiempos, IP, niveles, payloads y errores completos.
-3. [COMPLETADO] El manejo de CORS soporta múltiples orígenes, wildcards, arrays y funciones personalizadas, con tests para cada escenario.
-4. [COMPLETADO] Medidas de seguridad avanzadas: autenticación, sanitización, protección CSRF/XSS y monitoreo, validadas por tests.
