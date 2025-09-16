@@ -92,9 +92,8 @@ export async function POST(req) {
 
 This pattern is fully aligned with the best practices recommended by the Next.js team and the evolution of the framework.
 
-> ⚠️ **Warning: No Turbopack Compatibility**
-
-NextJs Proxy is fully compatible with Next.js using Webpack. However, Turbopack (the new experimental bundler for Next.js) currently has limitations with local packages, workspaces, and some advanced module resolution patterns. If you experience issues using this package with Turbopack, consider the following options:
+> ⚠️ **Warning: (No Turbopack Compatibility)**
+> NextJs Proxy is fully compatible with Next.js using Webpack. However, Turbopack (the new experimental bundler for Next.js) currently has limitations with local packages, workspaces, and some advanced module resolution patterns. If you experience issues using this package with Turbopack, consider the following options:
 
 - **Recommended:** Force the use of Webpack by adding to your `next.config.js`:
   ```js
