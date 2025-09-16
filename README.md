@@ -170,7 +170,10 @@ export const POST = nextProxyHandler({
   allowOrigins: ["http://localhost:3000", "https://app.my-domain.com"],
   inMemoryRate: { windowMs: 60_000, max: 100 },
   log: (e) => console.log("[proxy]", e),
-  validate: (req) => req.headers.get("authorization")?.includes("Bearer "),
+  validate: (req) => {
+    const auth = req.headers.get("authorization");
+    return !!(auth && auth.includes("Bearer "));
+  },
   transformRequest: ({ method, endpoint, data }) => ({
     method: method ?? "GET",
     endpoint: endpoint.startsWith("/internal")
@@ -181,7 +184,9 @@ export const POST = nextProxyHandler({
   transformResponse: (res) => ({ ...res, proxiedAt: new Date().toISOString() }),
   maskSensitiveData: (data) => {
     if (!data) return data;
-    if (data.password) return { ...data, password: "***" };
+    if (typeof data === "object" && data !== null && "password" in data) {
+      return { ...data, password: "***" };
+    }
     return data;
   },
 });
