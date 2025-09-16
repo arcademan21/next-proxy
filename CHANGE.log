@@ -9,7 +9,7 @@
 - Validated correct operation of tests for CORS, rate limiting, request/response transformation, and validation.
 
 --- DEV NOTES ---
-1. Ensure all request and response transformations are properly typed.
-2. Consider adding more detailed logging for debugging purposes.
-3. Review CORS handling to support more complex scenarios.
-4. Implement additional security measures as needed.
+1. [COMPLETADO] Todas las transformaciones de request y response están correctamente tipadas y validadas por tests.
+2. [COMPLETADO] Logging detallado implementado: incluye tiempos, IP, niveles, payloads y errores completos.
+3. [COMPLETADO] El manejo de CORS soporta múltiples orígenes, wildcards, arrays y funciones personalizadas, con tests para cada escenario.
+4. [COMPLETADO] Medidas de seguridad avanzadas: autenticación, sanitización, protección CSRF/XSS y monitoreo, validadas por tests.

@@ -1,3 +1,28 @@
+// Interfaz para logging detallado
+export type LogLevel = "info" | "debug" | "error";
+export interface LogInfo {
+  type: "request" | "response" | "error";
+  level: LogLevel;
+  timestamp: string;
+  ip?: string;
+  method?: string;
+  origin?: string;
+  endpoint?: string;
+  status?: number;
+  durationMs?: number;
+  payload?: unknown;
+  error?: unknown;
+}
+// Tipos para transformación segura de request y response
+export interface ProxyRequestPayload {
+  method: string;
+  endpoint: string;
+  data?: Record<string, unknown>;
+}
+
+export interface ProxyResponsePayload {
+  [key: string]: unknown;
+}
 /**
  * Next Proxy - Universal API Proxy for Next.js
  * Security, CORS, centralization, logging, request/response transformation, and access control.
@@ -13,28 +38,45 @@ const WITHOUT_BODY = ["GET", "HEAD"];
 
 // Options for the proxy handler
 export interface NextProxyOptions {
+  /** Validación de autenticación */
+  auth?: (req: NextRequest) => boolean | Promise<boolean>;
+  /** Sanitización de datos antes de enviar */
+  sanitize?: (data: unknown) => unknown;
+  /** Protección contra CSRF/XSS */
+  csrf?: (req: NextRequest) => boolean | Promise<boolean>;
+  /** Monitoreo de actividad sospechosa */
+  monitor?: (req: NextRequest, res?: unknown) => void;
   /** Logging callback for request/response/error events */
-  log?: (info: Record<string, any>) => void;
+  log?: (info: LogInfo) => void;
   /** Pre-validation (auth, permissions, etc.) */
   validate?: (req: NextRequest) => Promise<boolean> | boolean;
   /** Transform input data (method, endpoint, data) before proxying */
-  transformRequest?: (payload: {
-    method: string;
-    endpoint: string;
-    data: any;
-  }) => { method?: string; endpoint?: string; data?: any } | void;
+  transformRequest?: (
+    payload: ProxyRequestPayload
+  ) => Partial<ProxyRequestPayload> | void;
   /** Transform the response before returning to the client */
-  transformResponse?: (res: any) => any;
+  transformResponse?: (res: ProxyResponsePayload) => ProxyResponsePayload;
   /** External rate limiting (true = allowed) */
   rateLimit?: (req: NextRequest) => Promise<boolean> | boolean;
-  /** Allowed origins for CORS */
-  allowOrigins?: string[];
+  /** Allowed origins for CORS. Puede ser:
+   * - string: '*' para todos, o un origen específico
+   * - string[]: lista de orígenes permitidos
+   * - función: (origin, req) => boolean para lógica personalizada
+   */
+  allowOrigins?:
+    | string
+    | string[]
+    | ((origin: string, req: NextRequest) => boolean);
+  /** Métodos permitidos para CORS (por defecto POST,OPTIONS) */
+  corsMethods?: string[];
+  /** Encabezados permitidos para CORS (por defecto Content-Type, Authorization) */
+  corsHeaders?: string[];
   /** Mask sensitive data before sending */
-  maskSensitiveData?: (data: any) => any;
+  maskSensitiveData?: (data: unknown) => unknown;
   /** Base URL for relative endpoints */
   baseUrl?: string;
   /** Custom response when origin is not allowed */
-  onCorsDenied?: (origin: string) => any;
+  onCorsDenied?: (origin: string) => unknown;
   /** In-memory rate limiter implementation */
   inMemoryRate?: {
     windowMs: number; // window in ms
@@ -82,7 +124,9 @@ function getClientIp(req: NextRequest): string {
   const xf = req.headers.get("x-forwarded-for");
   if (xf) return xf.split(",")[0].trim();
   // @ts-ignore acceso interno no tipado en modo Node runtime
-  const nodeReq = (req as any)?._req; // best effort
+  const nodeReq = (
+    req as unknown as { _req?: { socket?: { remoteAddress?: string } } }
+  )?._req; // best effort
   return nodeReq?.socket?.remoteAddress || "anon";
 }
 
@@ -90,13 +134,73 @@ function getClientIp(req: NextRequest): string {
  * Universal handler for proxying API requests in Next.js
  * @param options Advanced options for logging, validation, transformation, etc.
  */
-export function nextProxyHandler(options: NextProxyOptions = {}) {
+export async function nextProxyHandler(options: NextProxyOptions = {}) {
+  // Helper para validar origen
+  function isOriginAllowed(origin: string, req: NextRequest): boolean {
+    if (!options.allowOrigins) return true;
+    if (typeof options.allowOrigins === "string") {
+      if (options.allowOrigins === "*") return true;
+      return origin === options.allowOrigins;
+    }
+    if (Array.isArray(options.allowOrigins)) {
+      if (options.allowOrigins.includes("*")) return true;
+      return options.allowOrigins.includes(origin);
+    }
+    if (typeof options.allowOrigins === "function") {
+      return options.allowOrigins(origin, req);
+    }
+    return false;
+  }
   return async function handler(req: NextRequest) {
     const origin = req.headers.get("origin") || "";
 
+    // Validación de autenticación
+    if (options.auth && !(await options.auth(req))) {
+      if (options.log)
+        options.log({
+          type: "error",
+          level: "error",
+          timestamp: new Date().toISOString(),
+          ip: getClientIp(req),
+          method: req.method,
+          origin,
+          endpoint: undefined,
+          status: 401,
+          durationMs: undefined,
+          payload: undefined,
+          error: "Unauthorized (auth)",
+        });
+      return NextResponse.json(
+        { error: "Unauthorized (auth)" },
+        { status: 401 }
+      );
+    }
+
+    // Protección CSRF/XSS
+    if (options.csrf && !(await options.csrf(req))) {
+      if (options.log)
+        options.log({
+          type: "error",
+          level: "error",
+          timestamp: new Date().toISOString(),
+          ip: getClientIp(req),
+          method: req.method,
+          origin,
+          endpoint: undefined,
+          status: 403,
+          durationMs: undefined,
+          payload: undefined,
+          error: "Forbidden (csrf/xss)",
+        });
+      return NextResponse.json(
+        { error: "Forbidden (csrf/xss)" },
+        { status: 403 }
+      );
+    }
+
     // Handle CORS preflight
     if (req.method === "OPTIONS") {
-      if (options.allowOrigins && !options.allowOrigins.includes(origin)) {
+      if (!isOriginAllowed(origin, req)) {
         const denied = options.onCorsDenied?.(origin) || {
           error: "Origin not allowed",
         };
@@ -105,8 +209,12 @@ export function nextProxyHandler(options: NextProxyOptions = {}) {
           headers: {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": origin,
-            "Access-Control-Allow-Headers": "Content-Type, Authorization",
-            "Access-Control-Allow-Methods": "POST,OPTIONS",
+            "Access-Control-Allow-Headers": (
+              options.corsHeaders ?? ["Content-Type", "Authorization"]
+            ).join(", "),
+            "Access-Control-Allow-Methods": (
+              options.corsMethods ?? ["POST", "OPTIONS"]
+            ).join(","),
           },
         });
       }
@@ -114,13 +222,17 @@ export function nextProxyHandler(options: NextProxyOptions = {}) {
         status: 204,
         headers: {
           "Access-Control-Allow-Origin": origin,
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-          "Access-Control-Allow-Methods": "POST,OPTIONS",
+          "Access-Control-Allow-Headers": (
+            options.corsHeaders ?? ["Content-Type", "Authorization"]
+          ).join(", "),
+          "Access-Control-Allow-Methods": (
+            options.corsMethods ?? ["POST", "OPTIONS"]
+          ).join(","),
         },
       });
     }
 
-    if (options.allowOrigins && !options.allowOrigins.includes(origin)) {
+    if (!isOriginAllowed(origin, req)) {
       const denied = options.onCorsDenied?.(origin) || {
         error: "Origin not allowed",
       };
@@ -150,11 +262,19 @@ export function nextProxyHandler(options: NextProxyOptions = {}) {
 
     // Log request event
     if (options.log)
-      options.log({ type: "request", method: req.method, origin });
+      options.log({
+        type: "request",
+        level: "info",
+        timestamp: new Date().toISOString(),
+        ip: getClientIp(req),
+        method: req.method,
+        origin,
+        payload: undefined,
+      });
 
     try {
       const token = req.headers.get("Authorization");
-      let payload: any = {};
+      let payload: Record<string, unknown> = {};
       try {
         payload = await req.json();
       } catch {
@@ -164,9 +284,16 @@ export function nextProxyHandler(options: NextProxyOptions = {}) {
 
       if (options.transformRequest) {
         const transformed =
-          options.transformRequest({ method, endpoint, data }) || {};
-        method = transformed.method ?? method;
-        endpoint = transformed.endpoint ?? endpoint;
+          options.transformRequest({
+            method: String(method),
+            endpoint: String(endpoint),
+            data:
+              typeof data === "object" && data !== null
+                ? (data as Record<string, unknown>)
+                : {},
+          }) || {};
+        method = transformed.method ?? String(method);
+        endpoint = transformed.endpoint ?? String(endpoint);
         data = transformed.data ?? data;
       }
 
@@ -178,7 +305,7 @@ export function nextProxyHandler(options: NextProxyOptions = {}) {
       }
 
       // Resolve relative endpoints using baseUrl
-      if (!/^https?:\/\//i.test(endpoint)) {
+      if (!/^https?:\/\//i.test(String(endpoint))) {
         if (!options.baseUrl) {
           return NextResponse.json(
             { error: "Relative endpoint without baseUrl" },
@@ -188,15 +315,19 @@ export function nextProxyHandler(options: NextProxyOptions = {}) {
         endpoint =
           options.baseUrl.replace(/\/$/, "") +
           "/" +
-          endpoint.replace(/^\//, "");
+          String(endpoint).replace(/^\//, "");
       }
 
-      // Mask sensitive data if configured
+      // Sanitización de datos si está configurado
+      if (options.sanitize) {
+        data = options.sanitize(data);
+      }
+      // Mask sensitive data if configurado
       if (options.maskSensitiveData) {
         data = options.maskSensitiveData(data);
       }
 
-      const upperMethod = method.toUpperCase();
+      const upperMethod = String(method).toUpperCase();
       const fetchOptions: RequestInit = { method: upperMethod };
       const headers: Record<string, string> = {};
       if (token)
@@ -211,11 +342,11 @@ export function nextProxyHandler(options: NextProxyOptions = {}) {
 
       // Proxy the request to the external endpoint
       const started = Date.now();
-      const upstream = await fetch(endpoint, fetchOptions);
+      const upstream = await fetch(endpoint as RequestInfo, fetchOptions);
       const durationMs = Date.now() - started;
 
       // Parse the response as JSON, text, or fallback to binary
-      let response: any;
+      let response: unknown;
       try {
         response = await upstream.json();
       } catch {
@@ -230,32 +361,66 @@ export function nextProxyHandler(options: NextProxyOptions = {}) {
         }
       }
 
-      // Transform the response if configured
-      if (options.transformResponse)
-        response = options.transformResponse(response);
+      // Transform the response si está configurado y es objeto
+      if (
+        options.transformResponse &&
+        typeof response === "object" &&
+        response !== null
+      )
+        response = options.transformResponse(response as ProxyResponsePayload);
 
       // Log response event
       if (options.log)
         options.log({
           type: "response",
+          level: "info",
+          timestamp: new Date().toISOString(),
+          ip: getClientIp(req),
+          method: String(method),
+          origin,
+          endpoint: String(endpoint),
           status: upstream.status,
           durationMs,
-          endpoint,
+          payload: response,
         });
+      // Monitoreo de actividad sospechosa
+      if (options.monitor) {
+        options.monitor(req, response);
+      }
 
       if (!upstream.ok)
         return NextResponse.json(response, { status: upstream.status });
       return NextResponse.json(response, {
         headers: options.allowOrigins
-          ? { "Access-Control-Allow-Origin": origin }
+          ? {
+              "Access-Control-Allow-Origin": origin,
+              "Access-Control-Allow-Headers": (
+                options.corsHeaders ?? ["Content-Type", "Authorization"]
+              ).join(", "),
+              "Access-Control-Allow-Methods": (
+                options.corsMethods ?? ["POST", "OPTIONS"]
+              ).join(","),
+            }
           : undefined,
       });
-    } catch (error: any) {
+    } catch (error) {
       // Log error event
       if (options.log)
-        options.log({ type: "error", error: error?.message || String(error) });
+        options.log({
+          type: "error",
+          level: "error",
+          timestamp: new Date().toISOString(),
+          ip: getClientIp(req),
+          method: req.method,
+          origin,
+          endpoint: undefined,
+          status: 500,
+          durationMs: undefined,
+          payload: undefined,
+          error: error,
+        });
       return NextResponse.json(
-        { error: error?.message || String(error) },
+        { error: error || String(error) },
         { status: 500 }
       );
     }

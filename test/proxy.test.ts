@@ -31,6 +31,7 @@ async function getBody(res: any): Promise<any> {
   return undefined;
 }
 import { nextProxyHandler, NextProxyOptions } from "../src/proxy";
+import type { ProxyRequestPayload, ProxyResponsePayload } from "../src/proxy";
 // Definición local mínima de NextRequest para pruebas, igual que en proxy.ts
 type NextRequest = {
   method: string;
@@ -63,8 +64,143 @@ function createMockRequest({
 }
 
 describe("nextProxyHandler", () => {
+  it("should block unauthorized requests with auth", async () => {
+    const handler = await nextProxyHandler({
+      auth: () => false,
+    });
+    const req = createMockRequest();
+    const res = await handler(req);
+    expect(getStatus(res)).toBe(401);
+    const body = await getBody(res);
+    expect(body.error).toMatch(/auth/i);
+  });
+
+  it("should allow authorized requests with auth", async () => {
+    const handler = await nextProxyHandler({
+      auth: () => true,
+      baseUrl: "https://jsonplaceholder.typicode.com",
+    });
+    const req = createMockRequest({
+      body: { method: "GET", endpoint: "/todos/1" },
+    });
+    const res = await handler(req);
+    expect(getStatus(res)).toBeGreaterThanOrEqual(200);
+  });
+
+  it("should block requests with failed csrf", async () => {
+    const handler = await nextProxyHandler({
+      csrf: () => false,
+    });
+    const req = createMockRequest();
+    const res = await handler(req);
+    expect(getStatus(res)).toBe(403);
+    const body = await getBody(res);
+    expect(body.error).toMatch(/csrf/i);
+  });
+
+  it("should allow requests with passed csrf", async () => {
+    const handler = await nextProxyHandler({
+      csrf: () => true,
+      baseUrl: "https://jsonplaceholder.typicode.com",
+    });
+    const req = createMockRequest({
+      body: { method: "GET", endpoint: "/todos/1" },
+    });
+    const res = await handler(req);
+    expect(getStatus(res)).toBeGreaterThanOrEqual(200);
+  });
+
+  it("should sanitize data before sending", async () => {
+    let sanitized = false;
+    const handler = await nextProxyHandler({
+      baseUrl: "https://jsonplaceholder.typicode.com",
+      sanitize: (data) => {
+        sanitized = true;
+        return Object.assign(
+          {},
+          typeof data === "object" && data !== null ? data : {},
+          { safe: true }
+        );
+      },
+    });
+    const req = createMockRequest({
+      body: { method: "POST", endpoint: "/posts", data: { foo: "bar" } },
+    });
+    await handler(req);
+    expect(sanitized).toBe(true);
+  });
+
+  it("should call monitor on response", async () => {
+    let called = false;
+    const handler = await nextProxyHandler({
+      baseUrl: "https://jsonplaceholder.typicode.com",
+      monitor: (req, res) => {
+        called = true;
+        expect(req).toBeDefined();
+        expect(res).toBeDefined();
+      },
+    });
+    const req = createMockRequest({
+      body: { method: "GET", endpoint: "/todos/1" },
+    });
+    await handler(req);
+    expect(called).toBe(true);
+  });
+  it("should allow all origins with wildcard", async () => {
+    const handler = await nextProxyHandler({ allowOrigins: "*" });
+    const req = createMockRequest({
+      method: "OPTIONS",
+      headers: { origin: "https://anything.com" },
+    });
+    const res = await handler(req);
+    expect(getStatus(res)).toBe(204);
+    expect(getHeader(res, "Access-Control-Allow-Origin")).toBe(
+      "https://anything.com"
+    );
+  });
+
+  it("should allow origin by function", async () => {
+    const handler = await nextProxyHandler({
+      allowOrigins: (origin) => origin.endsWith(".trusted.com"),
+    });
+    const req = createMockRequest({
+      method: "OPTIONS",
+      headers: { origin: "https://api.trusted.com" },
+    });
+    const res = await handler(req);
+    expect(getStatus(res)).toBe(204);
+    expect(getHeader(res, "Access-Control-Allow-Origin")).toBe(
+      "https://api.trusted.com"
+    );
+    // Should deny untrusted
+    const req2 = createMockRequest({
+      method: "OPTIONS",
+      headers: { origin: "https://evil.com" },
+    });
+    const res2 = await handler(req2);
+    expect(getStatus(res2)).toBe(403);
+  });
+
+  it("should set custom CORS methods and headers", async () => {
+    const handler = await nextProxyHandler({
+      allowOrigins: ["https://test.com"],
+      corsMethods: ["GET", "POST"],
+      corsHeaders: ["X-Custom", "Authorization"],
+    });
+    const req = createMockRequest({
+      method: "OPTIONS",
+      headers: { origin: "https://test.com" },
+    });
+    const res = await handler(req);
+    expect(getHeader(res, "Access-Control-Allow-Methods")).toBe("GET,POST");
+    expect(getHeader(res, "Access-Control-Allow-Headers")).toBe(
+      "X-Custom, Authorization"
+    );
+  });
   it("should handle CORS preflight", async () => {
-    const handler = nextProxyHandler({ allowOrigins: ["https://test.com"] });
+    const handler = await nextProxyHandler({
+      allowOrigins: ["https://test.com"],
+    });
     const req = createMockRequest({
       method: "OPTIONS",
       headers: { origin: "https://test.com" },
@@ -77,7 +213,9 @@ describe("nextProxyHandler", () => {
   });
 
   it("should deny CORS if origin not allowed", async () => {
-    const handler = nextProxyHandler({ allowOrigins: ["https://test.com"] });
+    const handler = await nextProxyHandler({
+      allowOrigins: ["https://test.com"],
+    });
     const req = createMockRequest({
       method: "OPTIONS",
       headers: { origin: "https://evil.com" },
@@ -87,7 +225,7 @@ describe("nextProxyHandler", () => {
   });
 
   it("should apply in-memory rate limiting", async () => {
-    const handler = nextProxyHandler({
+    const handler = await nextProxyHandler({
       inMemoryRate: { windowMs: 1000, max: 1, key: () => "test" },
     });
     const req = createMockRequest();
@@ -97,7 +235,7 @@ describe("nextProxyHandler", () => {
   });
 
   it("should call validate and block if false", async () => {
-    const handler = nextProxyHandler({
+    const handler = await nextProxyHandler({
       validate: () => false,
     });
     const req = createMockRequest();
@@ -107,7 +245,7 @@ describe("nextProxyHandler", () => {
 
   it("should call log on request and response", async () => {
     const logs: any[] = [];
-    const handler = nextProxyHandler({
+    const handler = await nextProxyHandler({
       log: (info) => logs.push(info),
       baseUrl: "https://jsonplaceholder.typicode.com",
     });
@@ -115,19 +253,35 @@ describe("nextProxyHandler", () => {
       body: { method: "GET", endpoint: "/todos/1" },
     });
     await handler(req);
-    expect(logs.some((l) => l.type === "request")).toBe(true);
-    expect(logs.some((l) => l.type === "response")).toBe(true);
+    // Validar campos clave en los logs
+    const requestLog = logs.find((l) => l.type === "request");
+    const responseLog = logs.find((l) => l.type === "response");
+    expect(requestLog).toBeDefined();
+    expect(responseLog).toBeDefined();
+    expect(typeof requestLog.timestamp).toBe("string");
+    expect(requestLog.level).toBe("info");
+    expect(typeof requestLog.ip).toBe("string");
+    expect(requestLog.method).toBe("POST");
+    expect(requestLog.origin).toBe("https://test.com");
+    expect(typeof responseLog.timestamp).toBe("string");
+    expect(responseLog.level).toBe("info");
+    expect(typeof responseLog.ip).toBe("string");
+    expect(responseLog.status).toBeGreaterThanOrEqual(200);
+    expect(responseLog.endpoint).toBe(
+      "https://jsonplaceholder.typicode.com/todos/1"
+    );
+    expect(responseLog.payload).toBeDefined();
   });
 
   it("should transform request and response", async () => {
-    const handler = nextProxyHandler({
+    const handler = await nextProxyHandler({
       baseUrl: "https://jsonplaceholder.typicode.com",
-      transformRequest: ({ method, endpoint, data }) => ({
+      transformRequest: ({ method, endpoint, data }: ProxyRequestPayload) => ({
         method,
         endpoint,
         data,
       }),
-      transformResponse: (res) => ({ id: res.id }),
+      transformResponse: (res: ProxyResponsePayload) => ({ id: res.id }),
     });
     const req = createMockRequest({
       body: { method: "GET", endpoint: "/todos/1" },
@@ -138,9 +292,14 @@ describe("nextProxyHandler", () => {
   });
 
   it("should mask sensitive data", async () => {
-    const handler = nextProxyHandler({
+    const handler = await nextProxyHandler({
       baseUrl: "https://jsonplaceholder.typicode.com",
-      maskSensitiveData: (data) => ({ ...data, secret: "***" }),
+      maskSensitiveData: (data) =>
+        Object.assign(
+          {},
+          typeof data === "object" && data !== null ? data : {},
+          { secret: "***" }
+        ),
     });
     const req = createMockRequest({
       body: { method: "POST", endpoint: "/posts", data: { secret: "1234" } },
@@ -151,14 +310,14 @@ describe("nextProxyHandler", () => {
   });
 
   it("should handle missing method or endpoint", async () => {
-    const handler = nextProxyHandler();
+    const handler = await nextProxyHandler();
     const req = createMockRequest({ body: {} });
     const res = await handler(req);
     expect(getStatus(res)).toBe(400);
   });
 
   it("should handle relative endpoint without baseUrl", async () => {
-    const handler = nextProxyHandler();
+    const handler = await nextProxyHandler();
     const req = createMockRequest({
       body: { method: "GET", endpoint: "/foo" },
     });
