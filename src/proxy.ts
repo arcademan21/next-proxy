@@ -134,7 +134,7 @@ function getClientIp(req: NextRequest): string {
  * Universal handler for proxying API requests in Next.js
  * @param options Advanced options for logging, validation, transformation, etc.
  */
-export async function nextProxyHandler(options: NextProxyOptions = {}) {
+export function nextProxyHandler(options: NextProxyOptions = {}) {
   // Helper para validar origen
   function isOriginAllowed(origin: string, req: NextRequest): boolean {
     if (!options.allowOrigins) return true;
@@ -425,6 +425,12 @@ export async function nextProxyHandler(options: NextProxyOptions = {}) {
       );
     }
   };
+}
+
+// Versión asíncrona: útil si necesitas inicialización async
+export async function nextProxyHandlerAsync(options: NextProxyOptions = {}) {
+  // Puedes agregar lógica async aquí si lo necesitas
+  return nextProxyHandler(options);
 }
 
 // Default export for convenience

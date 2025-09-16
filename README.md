@@ -61,11 +61,21 @@ export const config = {
 
 ```ts
 // app/api/proxy/route.ts
-import { nextProxyHandler } from "nextjs-proxy";
+import { nextProxyHandler, nextProxyHandlerAsync } from "nextjs-proxy";
 
+// Versión síncrona (recomendada para la mayoría de casos)
 export const POST = nextProxyHandler({
-  // ...all your advanced options (logging, transform, masking, etc.)
+  // ...todas tus opciones avanzadas (logging, transform, masking, etc.)
 });
+
+// Versión asíncrona (si necesitas inicialización async)
+const handlerPromise = nextProxyHandlerAsync({
+  /* opciones */
+});
+export async function POST(req) {
+  const handler = await handlerPromise;
+  return handler(req);
+}
 ```
 
 ---

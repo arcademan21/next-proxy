@@ -1,3 +1,9 @@
+## 2025-09-16
+
+- Se agregan dos versiones de `nextProxyHandler`:
+	- Síncrona: integración directa y simple (`export const POST = nextProxyHandler(...)`).
+	- Asíncrona: para inicialización avanzada (`nextProxyHandlerAsync`).
+- Se actualiza la documentación para reflejar ambas opciones.
 
 # CHANGE.log
 
