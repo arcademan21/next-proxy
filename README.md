@@ -37,11 +37,14 @@ module.exports = {
 
 ### 2. Global Middleware (middleware.ts)
 
-```js
-// middleware.ts
-import { NextResponse } from "next/server";
+> **Important:**
+> If your Next.js project uses the Pages Router (i.e., you have a `pages/` folder), the middleware file must be located at `src/middleware.ts` for Next.js to detect it correctly. If you use only the App Router, it can be in the project root or in `src/`.
 
-export function middleware(request) {
+```js
+// src/middleware.ts
+import { NextResponse, NextRequest } from "next/server";
+
+export function middleware(request: NextRequest) {
   // Example: global authentication
   const token = request.headers.get("authorization");
   if (!token) {
